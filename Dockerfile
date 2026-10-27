@@ -21,7 +21,7 @@ ARG LTX_REPO_REF=e98f6d927d83c92ef2be6aec76c8440b19306e39
 RUN git clone https://github.com/Lightricks/LTX-2.git /opt/LTX-2 \
     && git -C /opt/LTX-2 checkout --detach "${LTX_REPO_REF}" \
     && cd /opt/LTX-2 \
-    && uv sync --frozen --package ltx-pipelines --no-dev \
+    && uv sync --package ltx-pipelines --no-dev \
     && uv pip install --python /opt/LTX-2/.venv/bin/python fastapi uvicorn huggingface_hub
 
 WORKDIR /app
