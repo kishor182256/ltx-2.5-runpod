@@ -1,0 +1,1 @@
+# ltx-2.5-runpod
