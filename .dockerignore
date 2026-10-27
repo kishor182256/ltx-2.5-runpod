@@ -1,0 +1,8 @@
+.git
+generated
+__pycache__
+*.py[cod]
+app.py
+index.html
+start.bat
+README.md

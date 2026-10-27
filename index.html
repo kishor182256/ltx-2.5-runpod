@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LTX-2.5 · RunPod</title>
+  <style>
+    :root { color-scheme:dark; --bg:#0b1118; --panel:#131d28; --line:#2b3a49; --text:#edf3f8; --muted:#9aabba; --accent:#8ce4ca; --ink:#071914; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:radial-gradient(ellipse at 20% -10%,#203342 0,transparent 44%),var(--bg); color:var(--text); font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { width:min(900px,calc(100% - 32px)); margin:42px auto 60px; }
+    header { margin-bottom:22px; }
+    .eyebrow { color:var(--accent); font-size:12px; font-weight:750; letter-spacing:.14em; text-transform:uppercase; }
+    h1 { margin:7px 0 8px; font-size:clamp(28px,5vw,42px); letter-spacing:-.04em; line-height:1.1; }
+    .intro { color:var(--muted); max-width:690px; margin:0; }
+    .card { background:linear-gradient(145deg,rgba(23,34,49,.96),rgba(16,24,35,.98)); border:1px solid var(--line); border-radius:17px; padding:22px; margin:16px 0; box-shadow:0 16px 44px #0002; }
+    h2 { font-size:17px; margin:0 0 14px; }
+    label { display:block; font-size:13px; font-weight:700; margin:14px 0 7px; color:#dbe6f0; }
+    input,select,textarea { width:100%; border:1px solid #34475b; border-radius:10px; background:#0c131d; color:var(--text); padding:11px 12px; font:inherit; outline:none; }
+    input:focus,select:focus,textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px #8ce4ca18; }
+    textarea { resize:vertical; min-height:140px; line-height:1.55; }
+    .hint { color:var(--muted); font-size:12px; margin:6px 0 0; }
+    .row { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end; }
+    .fields { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+    button { border:0; border-radius:10px; padding:11px 16px; cursor:pointer; font:700 14px system-ui,sans-serif; background:var(--accent); color:var(--ink); white-space:nowrap; }
+    button:hover { filter:brightness(1.06); }
+    button:disabled { cursor:wait; opacity:.62; }
+    button.secondary { background:#233244; color:var(--text); border:1px solid #3a4d61; }
+    .actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:17px; }
+    .status { border:1px solid var(--line); border-radius:11px; background:#0c131d; padding:11px 14px; color:var(--muted); font-size:13px; min-height:44px; flex:1; }
+    .status.good { border-color:#286453; color:#9ae8cf; }
+    .status.bad { border-color:#714343; color:#ffaaaa; }
+    .status.busy { color:#d2e3f2; }
+    .result { margin-top:18px; display:none; }
+    .result video { display:block; max-width:100%; max-height:620px; border-radius:12px; background:#05080c; }
+    .download { display:inline-block; margin-top:10px; color:var(--accent); font-weight:700; }
+    details { color:#cfdae5; }
+    summary { cursor:pointer; font-weight:700; }
+    ol { padding-left:21px; }
+    li { margin:7px 0; }
+    code { border:1px solid #334456; border-radius:5px; padding:1px 5px; color:#d9eee8; background:#0b1119; }
+    @media(max-width:650px) { main{margin-top:26px}.card{padding:17px}.row{grid-template-columns:1fr}.row button{width:100%}.fields{grid-template-columns:repeat(2,1fr)} }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Local prompt · RunPod GPU</div>
+    <h1>LTX-2.5 Video Generator</h1>
+    <p class="intro">Enter a prompt here. Your GitHub-built LTX service runs on your RunPod Pod, and finished videos download to this computer.</p>
+  </header>
+
+  <section class="card">
+    <h2>1 · Connect to your RunPod service</h2>
+    <label for="apiKey">RunPod API key</label>
+    <input id="apiKey" type="password" placeholder="Paste your RunPod API key" autocomplete="off">
+    <p class="hint">Used only to find your running Pods. It stays in this browser session and is not saved.</p>
+    <div class="row">
+      <div><label for="podSelect">Running LTX service Pod</label><select id="podSelect" disabled><option>Find your Pods first</option></select></div>
+      <button id="findPodsButton" type="button">Find my Pods</button>
+    </div>
+    <label for="serviceToken">LTX service token</label>
+    <input id="serviceToken" type="password" placeholder="Token configured in the RunPod template" autocomplete="off">
+    <p class="hint">This must match <code>LTX_SERVICE_TOKEN</code> in RunPod. It stays in this browser session and is not saved.</p>
+    <div class="actions"><button id="testButton" class="secondary" type="button" disabled>Test selected Pod</button><span id="connectionStatus" class="status">Enter your RunPod API key to find the Pod</span></div>
+  </section>
+
+  <section class="card">
+    <h2>2 · Describe your video</h2>
+    <label for="prompt">Prompt</label>
+    <textarea id="prompt" maxlength="2000" placeholder="Describe the scene, action, camera, lighting, and sound…">A cinematic wide shot of a small sailboat crossing a calm lake at sunrise. The camera slowly tracks alongside as ripples catch warm golden light. Distant birds call softly, with natural wind and water sounds.</textarea>
+    <div class="fields">
+      <div><label for="width">Width</label><select id="width"><option value="768" selected>768 px</option><option value="512">512 px</option><option value="1024">1024 px</option></select></div>
+      <div><label for="height">Height</label><select id="height"><option value="512" selected>512 px</option><option value="768">768 px</option><option value="1024">1024 px</option></select></div>
+      <div><label for="frames">Frames</label><select id="frames"><option value="49" selected>49 · about 2 sec</option><option value="97">97 · about 4 sec</option><option value="121">121 · about 5 sec</option></select></div>
+      <div><label for="seed">Seed</label><input id="seed" type="number" value="-1" min="-1" max="2147483647"><p class="hint">-1 chooses a random seed</p></div>
+    </div>
+    <div class="actions"><button id="generateButton" type="button">Generate video on RunPod</button><span id="jobStatus" class="status">Connect to the service to begin</span></div>
+    <div id="result" class="result">
+      <video id="video" controls playsinline></video>
+      <a id="download" class="download" download>Download video</a>
+      <p id="fileInfo" class="hint"></p>
+    </div>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>First-time setup and how this works</summary>
+      <ol>
+        <li>Push this project to your GitHub repository. GitHub Actions builds the LTX service image from the included Dockerfile and publishes it to GitHub Container Registry.</li>
+        <li>In RunPod, create a Pod from that image. Attach a persistent volume at <code>/workspace</code>, set <code>HF_TOKEN</code> and <code>LTX_SERVICE_TOKEN</code>, and expose HTTP port <code>8000</code>.</li>
+        <li>The Pod installs the LTX Python dependencies in its container and downloads the gated LTX-2.5 weights to its persistent RunPod volume on first start. No model weights are downloaded to this computer.</li>
+        <li>Paste your RunPod API key and service token above, find the Pod, test the connection, and generate.</li>
+      </ol>
+    </details>
+  </section>
+</main>
+<script>
+  const $ = (id) => document.getElementById(id);
+  const connectionStatus = $('connectionStatus');
+  const jobStatus = $('jobStatus');
+  function setStatus(el, message, kind='') { el.textContent = message; el.className = 'status' + (kind ? ' ' + kind : ''); }
+  async function post(path, body) {
+    const response = await fetch(path, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    return data;
+  }
+  function connection() { return {pod_id:$('podSelect').value, service_token:$('serviceToken').value.trim()}; }
+
+  $('findPodsButton').addEventListener('click', async () => {
+    const api_key = $('apiKey').value.trim();
+    if (!api_key) { setStatus(connectionStatus, 'Enter your RunPod API key first.', 'bad'); return; }
+    $('findPodsButton').disabled = true; $('podSelect').disabled = true; $('testButton').disabled = true;
+    setStatus(connectionStatus, 'Looking for running Pods…', 'busy');
+    try {
+      const result = await post('/api/pods', {api_key});
+      const select = $('podSelect'); select.innerHTML = '';
+      for (const pod of result.pods) {
+        const option = document.createElement('option'); option.value = pod.id; option.dataset.ready = pod.has_api_port ? '1' : '0';
+        const portLabel = pod.has_api_port ? '8000/http ready' : `8000/http missing · ports: ${pod.ports?.join(', ') || 'none reported'}`;
+        option.textContent = `${pod.name} · ${pod.gpu_count}× ${pod.gpu} · ${portLabel} · ${pod.id}`;
+        select.appendChild(option);
+      }
+      select.disabled = result.pods.length === 0; $('testButton').disabled = result.pods.length === 0;
+      if (result.pods.some(pod => pod.has_api_port)) setStatus(connectionStatus, `${result.message} Select your LTX service Pod.`, 'good');
+      else if (result.pods.length) setStatus(connectionStatus, `${result.message} Expose HTTP port 8000 on the service Pod, then refresh this list.`, 'bad');
+      else setStatus(connectionStatus, `${result.message} This list shows Pods, not Serverless endpoints.`, 'bad');
+    } catch (error) { setStatus(connectionStatus, error.message, 'bad'); }
+    finally { $('findPodsButton').disabled = false; }
+  });
+
+  $('testButton').addEventListener('click', async () => {
+    if (!$('podSelect').value) { setStatus(connectionStatus, 'Find and select a running Pod first.', 'bad'); return; }
+    setStatus(connectionStatus, 'Checking the selected RunPod service…', 'busy'); $('testButton').disabled = true;
+    try {
+      const result = await post('/api/test', connection());
+      setStatus(connectionStatus, `${result.message} ${result.service?.model || 'LTX-2.5'} is ready.`, 'good');
+    } catch (error) { setStatus(connectionStatus, error.message, 'bad'); }
+    finally { $('testButton').disabled = false; }
+  });
+
+  $('generateButton').addEventListener('click', async () => {
+    if (!$('podSelect').value) { setStatus(jobStatus, 'Find and select your running RunPod Pod first.', 'bad'); return; }
+    const prompt = $('prompt').value.trim();
+    if (!prompt) { setStatus(jobStatus, 'Enter a prompt first.', 'bad'); return; }
+    $('generateButton').disabled = true; $('result').style.display = 'none';
+    setStatus(jobStatus, 'Submitting prompt to RunPod…', 'busy');
+    try {
+      const data = {
+        ...connection(), prompt,
+        width:Number($('width').value), height:Number($('height').value),
+        num_frames:Number($('frames').value), frame_rate:24, seed:Number($('seed').value)
+      };
+      const result = await post('/api/generate', data);
+      pollJob(result.job_id);
+    } catch (error) { setStatus(jobStatus, error.message, 'bad'); $('generateButton').disabled = false; }
+  });
+
+  async function pollJob(id) {
+    try {
+      const response = await fetch(`/api/jobs/${encodeURIComponent(id)}`, {cache:'no-store'});
+      const job = await response.json();
+      if (!response.ok) throw new Error(job.error || 'Could not read job status');
+      if (job.status === 'done') {
+        setStatus(jobStatus, job.message, 'good');
+        $('video').src = job.output_url; $('download').href = job.output_url; $('download').download = job.file_name || 'ltx-video.mp4';
+        $('fileInfo').textContent = `${job.file_name || 'Video'} · ${((job.file_size || 0)/(1024*1024)).toFixed(1)} MB · saved locally`;
+        $('result').style.display = 'block'; $('generateButton').disabled = false; return;
+      }
+      if (job.status === 'error') { setStatus(jobStatus, job.message || 'Generation failed.', 'bad'); $('generateButton').disabled = false; return; }
+      setStatus(jobStatus, job.message || 'Rendering on RunPod…', 'busy'); window.setTimeout(() => pollJob(id), 3000);
+    } catch (error) { setStatus(jobStatus, error.message, 'bad'); $('generateButton').disabled = false; }
+  }
+</script>
+</body>
+</html>

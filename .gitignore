@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+generated/*
+!generated/.gitkeep
+.venv/
+.env
+.env.*
