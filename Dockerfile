@@ -8,10 +8,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LTX_MODEL_DIR=/workspace/models/ltx-2.5 \
     LTX_OUTPUT_DIR=/workspace/outputs \
     HF_HOME=/workspace/hf-cache \
+    CC=/usr/bin/gcc \
+    CXX=/usr/bin/g++ \
     PATH=/opt/LTX-2/.venv/bin:/root/.local/bin:$PATH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl git ffmpeg libgl1 libglib2.0-0 python3 python3-venv \
+      build-essential ca-certificates curl git ffmpeg libgl1 libglib2.0-0 python3 python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
