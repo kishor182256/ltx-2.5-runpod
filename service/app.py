@@ -133,7 +133,11 @@ def run_generation(job_id: str, request: GenerateRequest) -> None:
                 check=False,
             )
         if completed.returncode != 0:
-            detail = log_path.read_text(encoding="utf-8", errors="replace")[-6000:]
+            full_detail = log_path.read_text(encoding="utf-8", errors="replace")
+            if len(full_detail) > 6000:
+                detail = full_detail[:2200] + "\n...[middle of log truncated]...\n" + full_detail[-3500:]
+            else:
+                detail = full_detail
             update_job(job_id, status="error", message="LTX generation failed. " + detail.strip())
             output_path.unlink(missing_ok=True)
             return

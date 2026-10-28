@@ -26,6 +26,10 @@ RUN git clone https://github.com/Lightricks/LTX-2.git /opt/LTX-2 \
     && uv sync --package ltx-pipelines --no-dev \
     && uv pip install --python /opt/LTX-2/.venv/bin/python fastapi uvicorn huggingface_hub
 
+# Triton builds a small Python extension when it first initializes a GPU.
+RUN apt-get update && apt-get install -y --no-install-recommends python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY service/app.py /app/app.py
 COPY service/entrypoint.sh /app/entrypoint.sh
